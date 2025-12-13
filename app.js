@@ -81,8 +81,6 @@ const dietsData = {
 
 // =================================================================
 // [2] CÓDIGO DE DETALLES DE RECETAS (recipesDetails)
-// NOTA: Para el index.html, solo se necesita el objeto, no todo el detalle.
-// Sin embargo, lo mantendremos para evitar errores de referencia si se intenta acceder.
 // =================================================================
 const recipesDetails = { /* Generalmente vacío o con datos */ };
 
@@ -192,12 +190,12 @@ function RecipeCard({ recipe }) {
     try {
         const handleRecipeClick = () => {
             // Navegación corregida para el detalle de la receta
-            window.location.href = `recipe-detail.html?id=${recipe.id}`;
+            window.location.href = `/recipe-detail.html?id=${recipe.id}`;
         };
 
         return (
             <div 
-                className="recipe-card p-4 border border-gray-100 flex flex-col hover:border-[var(--primary-color)]"
+                className="recipe-card p-4 border border-gray-100 flex flex-col hover:border-[var(--primary-color)] transition-all"
                 onClick={handleRecipeClick}
                 data-name="recipe-card"
                 data-file="components/RecipeCard.js"
@@ -366,6 +364,11 @@ function App() {
                                 : 'Todas las Recetas'
                             }
                         </h2>
+                        {/* Mensaje de debug para confirmar el filtrado */}
+                        <p className="text-sm text-gray-500 mb-4">
+                            Mostrando {filteredRecipes.length} recetas.
+                        </p>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredRecipes.map(recipe => (
                                 <RecipeCard key={recipe.id} recipe={recipe} />
