@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Detalle de Receta - RecetasApp</title>
+    <meta name="description" content="Descubre los ingredientes y pasos para preparar esta deliciosa receta">
+    <meta name="keywords" content="receta, cocina, ingredientes, preparación">
+    
+    <meta property="og:title" content="Detalle de Receta - RecetasApp">
+    <meta property="og:description" content="Descubre los ingredientes y pasos para preparar esta deliciosa receta">
+    
+    <meta name="twitter:title" content="Detalle de Receta - RecetasApp">
+    <meta name="twitter:description" content="Descubre los ingredientes y pasos para preparar esta deliciosa receta">
+
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react@18/umd/react.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://resource.trickle.so/vendor_lib/unpkg/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
+
+    <style type="text/tailwindcss">
+    @layer theme {
+        :root {
+            --primary-color: #ff6b35;
+            --secondary-color: #fff4e6;
+            --accent-color: #ffa726;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+        }
+    }
+
+    @layer base {
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--text-dark);
+        }
+    }
+
+    @layer components {
+        .btn-primary {
+            @apply px-6 py-3 bg-[var(--primary-color)] text-white rounded-lg font-medium hover:opacity-90 transition-all;
+        }
+    }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+    
+    <script type="text/babel" src="components/Header.js"></script>
+    <script type="text/babel" src="components/Footer.js"></script>
+    <script type="text/babel" src="data/dietsData.js"></script>
+    <script type="text/babel" src="data/recipesDetails.js"></script>
+    <script type="text/babel" src="recipe-detail-app.js"></script>
+</body>
+</html>
