@@ -6,19 +6,14 @@
 
     <title>Detalle de Receta - RecetasApp</title>
     <meta name="description" content="Descubre los ingredientes y pasos para preparar esta deliciosa receta">
-    <meta name="keywords" content="receta, cocina, ingredientes, preparación">
     
-    <meta property="og:title" content="Detalle de Receta - RecetasApp">
-    <meta property="og:description" content="Descubre los ingredientes y pasos para preparar esta deliciosa receta">
-    
-    <meta name="twitter:title" content="Detalle de Receta - RecetasApp">
-    <meta name="twitter:description" content="Descubre los ingredientes y pasos para preparar esta deliciosa receta">
+    <base href="/">
 
-    <script src="https://resource.trickle.so/vendor_lib/unpkg/react@18/umd/react.production.min.js"></script>
-    <script src="https://resource.trickle.so/vendor_lib/unpkg/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://resource.trickle.so/vendor_lib/unpkg/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://resource.trickle.so/vendor_lib/unpkg/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
+    <link href="https://unpkg.com/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
 
     <style type="text/tailwindcss">
     @layer theme {
@@ -42,16 +37,20 @@
         .btn-primary {
             @apply px-6 py-3 bg-[var(--primary-color)] text-white rounded-lg font-medium hover:opacity-90 transition-all;
         }
+        
+        .category-card {
+            @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden;
+        }
+        
+        .recipe-card {
+            @apply bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden;
+        }
     }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div id="root"></div>
+    <div id="root-detail"></div>
     
-    <script type="text/babel" src="components/Header.js"></script>
-    <script type="text/babel" src="components/Footer.js"></script>
-    <script type="text/babel" src="data/dietsData.js"></script>
-    <script type="text/babel" src="data/recipesDetails.js"></script>
     <script type="text/babel" src="recipe-detail-app.js"></script>
 </body>
 </html>
