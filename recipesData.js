@@ -203,4 +203,29 @@ const recipesData = {
       time: '5 min',
       difficulty: 'Fácil',
       rating: 4.5,
-      image: '
+      image: 'https://images.unsplash.com/photo-1610970881699-44a5587cabec?w=400&h=300&fit=crop'
+    },
+    {
+      id: 19,
+      name: 'Limonada Natural',
+      category: 'drinks',
+      categoryName: 'Bebidas',
+      description: 'Refrescante limonada con menta fresca',
+      time: '10 min',
+      difficulty: 'Fácil',
+      rating: 4.6,
+      image: 'https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=400&h=300&fit=crop'
+    },
+    {
+      id: 20,
+      name: 'Café Latte',
+      category: 'drinks',
+      categoryName: 'Bebidas',
+      description: 'Café con leche espumosa y arte latte',
+      time: '8 min',
+      difficulty: 'Media',
+      rating: 4.8,
+      image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400&h=300&fit=crop'
+    }
+  ]
+};
