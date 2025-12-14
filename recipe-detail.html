@@ -1,23 +1,3 @@
-<script src="dietsData.js"></script> 
-    <script src="recipesData.js"></script> 
-    <script src="recipesDetails.js"></script> 
-    ```
-
-### 2. ➕ Cambios en el `<script type="text/babel">`: Lógica de Fusión
-
-Debemos adaptar la lógica de fusión al hecho de que ahora tienes **tres fuentes de datos principales**:
-
-* `dietsData` (para las categorías)
-* `recipesData` (para la metadata general de las recetas)
-* `recipesDetails` (para ingredientes y pasos)
-
-La lógica más eficiente es iterar sobre `recipesDetails` (que contiene los IDs de todas las recetas detalladas) y fusionarlo con la data de `recipesData` y `dietsData`.
-
----
-
-### **CÓDIGO COMPLETO DE `recipe-detail.html` CORREGIDO**
-
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -34,7 +14,6 @@ La lógica más eficiente es iterar sobre `recipesDetails` (que contiene los IDs
     <script src="dietsData.js"></script> 
     <script src="recipesData.js"></script> 
     <script src="recipesDetails.js"></script> 
-
     <style type="text/tailwindcss">
     @layer theme {
         :root {
@@ -65,22 +44,46 @@ La lógica más eficiente es iterar sobre `recipesDetails` (que contiene los IDs
     <script type="text/babel">
         
         // =================================================================
-        // [1] LÓGICA DE FUSIÓN DE DATOS (Crea las 30 recetas detalladas)
-        // Ahora usamos recipesDetails, recipesData y dietsData cargados desde los archivos .js
+        // [1] PASO CRÍTICO: NORMALIZACIÓN DE DATOS
+        // Convertimos los arrays anidados (ej: dietsData.diets) en objetos indexados 
+        // por ID para búsqueda rápida. Esto corrige el problema de la estructura.
+        // =================================================================
+
+        // 1. Crear mapa de Dietas { 'hypocaloric': { name: 'Hipocalórica', ... }, ... }
+        const dietsMap = dietsData.diets.reduce((acc, diet) => {
+            acc[diet.id] = diet;
+            return acc;
+        }, {});
+        
+        // 2. Crear mapa de Recetas Base { 1: { name: 'Ensalada...', ... }, 2: { ... }, ... }
+        // Usamos el array de dietsData.recipes (que tiene 30 elementos)
+        const recipesBaseMap = dietsData.recipes.reduce((acc, recipe) => {
+            // Aseguramos que la clave sea el ID numérico
+            acc[recipe.id] = recipe;
+            return acc;
+        }, {});
+
+        // El objeto recipesDetails ya está bien estructurado por ID
+        const recipesDetailsMap = recipesDetails; 
+
+
+        // =================================================================
+        // [2] LÓGICA DE FUSIÓN DE DATOS (Crea las 30 recetas detalladas)
+        // Usa los mapas normalizados creados en el paso [1].
         // =================================================================
         const recipeDetailsData = {};
 
-        // 1. Itera sobre las claves de los detalles (ID's)
-        Object.keys(recipesDetails).forEach(recipeId => {
-            const detail = recipesDetails[recipeId];
-            const baseRecipe = recipesData[recipeId]; // Asume que recipesData es un objeto mapeado por ID
+        // Iterar sobre las claves de los detalles (IDs de la 1 a la 30)
+        Object.keys(recipesDetailsMap).forEach(recipeId => {
+            const detail = recipesDetailsMap[recipeId];
+            const baseRecipe = recipesBaseMap[recipeId]; // Buscar en el mapa base
 
             if (baseRecipe && detail) {
-                // 2. Encuentra el nombre del tipo de dieta usando dietsData
+                // Encuentra el nombre del tipo de dieta usando dietsMap
                 const dietKey = baseRecipe.dietType;
-                const dietTypeName = dietsData[dietKey] ? dietsData[dietKey].name : 'Dieta Desconocida';
+                const dietTypeName = dietsMap[dietKey] ? dietsMap[dietKey].name : 'Dieta Desconocida';
 
-                // 3. Fusiona toda la información en un solo objeto para el detalle
+                // Fusiona toda la información
                 recipeDetailsData[recipeId] = {
                     ...baseRecipe,
                     dietTypeName: dietTypeName,
@@ -90,7 +93,7 @@ La lógica más eficiente es iterar sobre `recipesDetails` (que contiene los IDs
         });
 
         // =================================================================
-        // [2] COMPONENTES DE DETALLE (Sin cambios respecto a la última vez)
+        // [3] COMPONENTES DE DETALLE (Componentes de React)
         // =================================================================
         
         function HeaderDetail() {
@@ -124,6 +127,7 @@ La lógica más eficiente es iterar sobre `recipesDetails` (que contiene los IDs
                     </div>
                 );
             }
+            // Aseguramos que nutritional tenga un valor si no está definido
             const nutritional = recipe.nutritionalInfo || {}; 
             
             return (
@@ -168,91 +172,4 @@ La lógica más eficiente es iterar sobre `recipesDetails` (que contiene los IDs
                         </div>
 
                         {/* Columna de Ingredientes (Sidebar) */}
-                        <div className="lg:col-span-1 bg-white p-6 rounded-xl shadow-md h-fit">
-                            <h2 className="text-2xl font-bold text-[var(--primary-color)] mb-4 border-b pb-2">Ingredientes</h2>
-                            <ul className="space-y-3">
-                                {recipe.ingredients && recipe.ingredients.map((item, index) => (
-                                    // Los ingredientes se muestran como strings planos
-                                    <li key={index} className="flex justify-between border-b border-gray-50 pb-2 last:border-b-0">
-                                        <span className="text-[var(--text-dark)]">{item}</span>
-                                    </li>
-                                ))}
-                                {!recipe.ingredients && <p className="text-[var(--text-light)] text-sm">Lista de ingredientes no disponible.</p>}
-                            </ul>
-                        </div>
-                    </div>
-
-                    {/* Sección de Pasos e Información Nutricional */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Pasos */}
-                        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
-                            <h2 className="text-2xl font-bold text-[var(--primary-color)] mb-4 border-b pb-2">Preparación</h2>
-                            <ol className="list-decimal list-inside space-y-4">
-                                {recipe.steps && recipe.steps.map((step, index) => (
-                                    <li key={index} className="text-[var(--text-dark)] pl-2">
-                                        <span className="font-medium">{step}</span>
-                                    </li>
-                                ))}
-                                {!recipe.steps && <p className="text-[var(--text-light)] text-sm">Pasos de preparación no disponibles.</p>}
-                            </ol>
-                        </div>
-
-                        {/* Nutrición */}
-                        <div className="lg:col-span-1 bg-white p-6 rounded-xl shadow-md h-fit">
-                            <h2 className="text-2xl font-bold text-[var(--primary-color)] mb-4 border-b pb-2">Nutrición (Aprox.)</h2>
-                            <div className="space-y-3">
-                                <div className="flex justify-between items-center py-1">
-                                    <span className="font-semibold text-sm">Proteínas</span>
-                                    <span className="text-[var(--text-dark)]">{nutritional.protein || 'N/A'}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-1">
-                                    <span className="font-semibold text-sm">Grasas</span>
-                                    <span className="text-[var(--text-dark)]">{nutritional.fat || 'N/A'}</span>
-                                </div>
-                                <div className="flex justify-between items-center py-1">
-                                    <span className="font-semibold text-sm">Carbohidratos</span>
-                                    <span className="text-[var(--text-dark)]">{nutritional.carbs || 'N/A'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-        
-        // =================================================================
-        // [3] LÓGICA PRINCIPAL (DetailApp)
-        // =================================================================
-        function DetailApp() {
-            try {
-                const urlParams = new URLSearchParams(window.location.search);
-                const recipeId = urlParams.get('id');
-
-                // Busca en el objeto fusionado (que ahora tiene las 30 recetas)
-                const recipe = recipeDetailsData[recipeId]; 
-                
-                return (
-                    <div className="min-h-screen bg-gray-50">
-                        <HeaderDetail />
-                        
-                        <main className="container mx-auto px-4 py-12">
-                            <RecipeDetail recipe={recipe} />
-                        </main>
-                    </div>
-                );
-            } catch (error) {
-                console.error('DetailApp component error:', error);
-                return (
-                     <div className="text-center py-20">
-                        <h1 className="text-3xl font-bold text-red-600">Error fatal de la aplicación</h1>
-                        <p className="text-lg text-[var(--text-light)] mt-2">Revise la consola para más detalles.</p>
-                    </div>
-                );
-            }
-        }
-
-        const rootDetail = ReactDOM.createRoot(document.getElementById('root-detail'));
-        rootDetail.render(<DetailApp />);
-    </script>
-</body>
-</html>
+                        <div className="lg:col-span-1 bg-white p-6 rounded-xl shadow
