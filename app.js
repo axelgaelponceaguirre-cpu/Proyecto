@@ -1,5 +1,5 @@
 // =================================================================
-// [1] CÓDIGO DE DATOS (dietsData)
+// [1] DATOS CONSOLIDADOS
 // =================================================================
 
 const dietsData = {
@@ -79,20 +79,16 @@ const dietsData = {
     ]
 };
 
-// =================================================================
-// [2] CÓDIGO DE DETALLES DE RECETAS (recipesDetails)
-// =================================================================
-const recipesDetails = { /* Generalmente vacío o con datos */ };
-
+const recipesDetails = { /* Generalmente vacío o con datos */ }; // <-- CORRECCIÓN: Punto y coma añadido aquí.
 
 // =================================================================
-// [3] CÓDIGO DE COMPONENTES (Header, Footer, Cards, etc.)
+// [2] COMPONENTES DE REACT (JSX)
 // =================================================================
 
 function Header() {
     try {
         return (
-            <header className="bg-white shadow-sm sticky top-0 z-50" data-name="header" data-file="components/Header.js">
+            <header className="bg-white shadow-sm sticky top-0 z-50" data-name="header">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-center">
                         <div className="flex items-center gap-3">
@@ -114,7 +110,7 @@ function Header() {
 function Footer() {
     try {
         return (
-            <footer className="bg-white border-t border-gray-200 mt-16" data-name="footer" data-file="components/Footer.js">
+            <footer className="bg-white border-t border-gray-200 mt-16" data-name="footer">
                 <div className="container mx-auto px-4 py-8">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
@@ -156,7 +152,6 @@ function DietCard({ diet, onClick, isSelected }) {
                 className={`category-card p-6 ${isSelected ? 'ring-2 ring-[var(--primary-color)]' : ''}`}
                 onClick={onClick}
                 data-name="diet-card" 
-                data-file="components/DietCard.js"
             >
                 <div className="flex items-start justify-between mb-4">
                     <div className="w-16 h-16 rounded-xl bg-[var(--secondary-color)] flex items-center justify-center">
@@ -189,7 +184,6 @@ function DietCard({ diet, onClick, isSelected }) {
 function RecipeCard({ recipe }) {
     try {
         const handleRecipeClick = () => {
-            // Navegación corregida para el detalle de la receta
             window.location.href = `/recipe-detail.html?id=${recipe.id}`;
         };
 
@@ -198,7 +192,6 @@ function RecipeCard({ recipe }) {
                 className="recipe-card p-4 border border-gray-100 flex flex-col hover:border-[var(--primary-color)] transition-all"
                 onClick={handleRecipeClick}
                 data-name="recipe-card"
-                data-file="components/RecipeCard.js"
             >
                 <div className="h-36 mb-4 overflow-hidden rounded-lg">
                     <img 
@@ -230,53 +223,8 @@ function RecipeCard({ recipe }) {
     }
 }
 
-// Opcional: El componente CategoryCard que enviaste
-function CategoryCard({ category, onClick }) {
-    try {
-        return (
-            <div 
-                className="category-card p-6" 
-                onClick={onClick}
-                data-name="category-card" 
-                data-file="components/CategoryCard.js"
-            >
-                <div className="flex items-center justify-between mb-4">
-                    <div className="w-16 h-16 rounded-xl bg-[var(--secondary-color)] flex items-center justify-center">
-                        <div className={`icon-${category.icon} text-3xl text-[var(--primary-color)]`}></div>
-                    </div>
-                    <div className="icon-arrow-right text-xl text-[var(--text-light)]"></div>
-                </div>
-                <h3 className="text-xl font-bold mb-2">{category.name}</h3>
-                <p className="text-[var(--text-light)]">{category.count} recetas</p>
-            </div>
-        );
-    } catch (error) {
-        console.error('CategoryCard component error:', error);
-        return null;
-    }
-}
-
-// Opcional: El componente Icon que enviaste
-function Icon({ iconName }) {
-    try {
-        return (
-            <div 
-                className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 bg-[var(--secondary-color)]"
-                data-name="icon"
-                data-file="components/Icon.js"
-            >
-                <div className={`icon-${iconName} text-2xl text-[var(--primary-color)]`}></div>
-            </div>
-        );
-    } catch (error) {
-        console.error('Icon component error:', error);
-        return null;
-    }
-}
-
-
 // =================================================================
-// [4] LÓGICA PRINCIPAL (ErrorBoundary y App)
+// [3] LÓGICA PRINCIPAL (ErrorBoundary y App)
 // =================================================================
 
 class ErrorBoundary extends React.Component {
@@ -313,10 +261,14 @@ class ErrorBoundary extends React.Component {
 
 function App() {
     try {
+        // Inicializar el estado de la dieta seleccionada a null
         const [selectedDiet, setSelectedDiet] = React.useState(null);
 
         const handleDietClick = (dietId) => {
-            setSelectedDiet(dietId);
+            // Si hace clic en la misma dieta, la deseleccionamos (volviendo a null)
+            setSelectedDiet(prevId => prevId === dietId ? null : dietId);
+            
+            // Desplazamiento suave a la sección de recetas
             setTimeout(() => {
                 const recipesSection = document.getElementById('recipes-section');
                 if (recipesSection) {
@@ -325,12 +277,16 @@ function App() {
             }, 100);
         };
 
+        // Lógica de filtrado de recetas
         const filteredRecipes = selectedDiet
             ? dietsData.recipes.filter(r => r.dietType === selectedDiet)
             : dietsData.recipes;
 
+        // Determinar el nombre de la dieta seleccionada para el título
+        const selectedDietName = dietsData.diets.find(d => d.id === selectedDiet)?.name;
+
         return (
-            <div className="min-h-screen bg-gray-50" data-name="app" data-file="app.js">
+            <div className="min-h-screen bg-gray-50" data-name="app">
                 <Header />
                 
                 <main className="container mx-auto px-4 py-12">
@@ -345,7 +301,7 @@ function App() {
 
                     <section className="mb-16">
                         <h2 className="text-3xl font-bold text-center mb-8">Elige tu Dieta</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                             {dietsData.diets.map(diet => (
                                 <DietCard 
                                     key={diet.id} 
@@ -360,16 +316,16 @@ function App() {
                     <section id="recipes-section">
                         <h2 className="text-2xl font-bold mb-6">
                             {selectedDiet 
-                                ? `Recetas ${dietsData.diets.find(d => d.id === selectedDiet)?.name}`
+                                ? `Recetas ${selectedDietName}`
                                 : 'Todas las Recetas'
                             }
                         </h2>
-                        {/* Mensaje de debug para confirmar el filtrado */}
+                        
                         <p className="text-sm text-gray-500 mb-4">
                             Mostrando {filteredRecipes.length} recetas.
                         </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {filteredRecipes.map(recipe => (
                                 <RecipeCard key={recipe.id} recipe={recipe} />
                             ))}
@@ -394,6 +350,10 @@ function App() {
         return null;
     }
 }
+
+// =================================================================
+// [4] RENDERIZADO AL DOM
+// =================================================================
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
