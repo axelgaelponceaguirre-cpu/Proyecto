@@ -44,49 +44,67 @@
     <script type="text/babel">
         
         // =================================================================
-        // [1] NORMALIZACIÓN Y FUSIÓN DE DATOS
-        // Esto corrige el problema de estructura de tus archivos (ej: dietsData.diets en lugar de solo dietsData).
+        // [1] VERIFICACIÓN Y NORMALIZACIÓN DE DATOS
         // =================================================================
 
-        // Mapeo 1: Convertir el array de dietas en un objeto para búsqueda rápida por ID
-        const dietsMap = window.dietsData && window.dietsData.diets ? window.dietsData.diets.reduce((acc, diet) => {
-            acc[diet.id] = diet;
-            return acc;
-        }, {}) : {};
-        
-        // Mapeo 2: Usar la lista de 30 recetas de dietsData.recipes
-        const recipesBaseMap = window.dietsData && window.dietsData.recipes ? window.dietsData.recipes.reduce((acc, recipe) => {
-            acc[recipe.id] = recipe;
-            return acc;
-        }, {}) : {};
+        let globalDataError = null;
 
-        // Mapeo 3: Usar los detalles de recetas. Si recipesDetails está incompleto, usa un objeto vacío.
-        const recipesDetailsMap = window.recipesDetails || {}; 
-
-
-        // Lógica de Fusión: Crear el objeto final con todos los detalles
-        const recipeDetailsData = {};
-
-        // Iterar sobre las claves de los detalles
-        Object.keys(recipesDetailsMap).forEach(recipeId => {
-            const detail = recipesDetailsMap[recipeId];
-            const baseRecipe = recipesBaseMap[recipeId]; 
-
-            if (baseRecipe && detail) {
-                // Obtener nombre de la dieta del mapa
-                const dietKey = baseRecipe.dietType;
-                const dietTypeName = dietsMap[dietKey] ? dietsMap[dietKey].name : 'Dieta Desconocida';
-
-                // Fusionar: base (name, time, image, etc.) + detail (ingredients, steps)
-                recipeDetailsData[recipeId] = {
-                    ...baseRecipe,
-                    dietTypeName: dietTypeName,
-                    ...detail,
-                    // Asegurarse de que el ID sea string (para la URL)
-                    id: String(baseRecipe.id) 
-                };
+        // **AÑADIDO:** Función para verificar la disponibilidad de los datos
+        function checkDataAvailability() {
+            if (!window.dietsData || !window.dietsData.diets || !window.dietsData.recipes) {
+                return "dietsData.js no está disponible o su estructura (dietsData.diets/recipes) es incorrecta. Revise la sintaxis (comas, llaves, punto y coma).";
             }
-        });
+            if (!window.recipesDetails) {
+                return "recipesDetails.js no está disponible. Revise la sintaxis, especialmente el cierre final: '};'";
+            }
+            return null; // Todo bien
+        }
+
+        globalDataError = checkDataAvailability();
+
+        let recipeDetailsData = {};
+
+        if (!globalDataError) {
+            try {
+                // Mapeo 1: Convertir el array de dietas en un objeto para búsqueda rápida por ID
+                const dietsMap = window.dietsData.diets.reduce((acc, diet) => {
+                    acc[diet.id] = diet;
+                    return acc;
+                }, {});
+                
+                // Mapeo 2: Usar la lista de 30 recetas de dietsData.recipes
+                const recipesBaseMap = window.dietsData.recipes.reduce((acc, recipe) => {
+                    acc[recipe.id] = recipe;
+                    return acc;
+                }, {});
+
+                // Mapeo 3: Usar los detalles de recetas.
+                const recipesDetailsMap = window.recipesDetails; 
+
+                // Lógica de Fusión: Crear el objeto final con todos los detalles
+                Object.keys(recipesDetailsMap).forEach(recipeId => {
+                    const detail = recipesDetailsMap[recipeId];
+                    const baseRecipe = recipesBaseMap[recipeId]; 
+
+                    if (baseRecipe && detail) {
+                        const dietKey = baseRecipe.dietType;
+                        const dietTypeName = dietsMap[dietKey] ? dietsMap[dietKey].name : 'Dieta Desconocida';
+
+                        recipeDetailsData[recipeId] = {
+                            ...baseRecipe,
+                            dietTypeName: dietTypeName,
+                            ...detail,
+                            id: String(baseRecipe.id) 
+                        };
+                    }
+                });
+                
+            } catch (e) {
+                // Capturar errores durante la normalización (ej: un dato es 'undefined')
+                globalDataError = `Error interno al procesar los datos (revisar la consola F12): ${e.message}`;
+                console.error("Error en el bloque de normalización de datos:", e);
+            }
+        }
 
 
         // =================================================================
@@ -114,14 +132,28 @@
                 </header>
             );
         }
+        
+        // **AÑADIDO:** Componente para mostrar un error de datos claro
+        function DataErrorView({ message }) {
+            return (
+                <div className="text-center py-20 bg-red-50 border-2 border-red-300 rounded-xl p-8 max-w-2xl mx-auto shadow-lg">
+                    <h1 className="text-3xl font-bold text-red-700 mb-4">🚨 Error de Carga de Datos Críticos 🚨</h1>
+                    <p className="text-lg text-red-600 mb-4 font-medium">{message}</p>
+                    <p className="text-sm text-gray-700">
+                        **Acción requerida:** Revise los archivos `.js` (`dietsData.js`, `recipesDetails.js`, etc.) y asegúrese de que no tengan **errores de sintaxis** (comas extra, llaves o corchetes sin cerrar, puntos y comas faltantes). El error de un archivo detiene la aplicación.
+                    </p>
+                    <p className="text-xs text-gray-500 mt-3">Para detalles técnicos, abra la Consola del Navegador (F12).</p>
+                </div>
+            );
+        }
+
 
         function RecipeDetail({ recipe }) {
             if (!recipe) {
                 return (
                     <div className="text-center py-20">
-                        <h1 className="text-3xl font-bold text-red-600">Receta no encontrada</h1>
-                        <p className="text-lg text-[var(--text-light)] mt-2">Verifique si el ID es correcto o si los datos están cargados.</p>
-                        <p className="text-sm text-gray-500 mt-4">Asegúrese que recipesDetails.js termina con "};" y no tiene errores de sintaxis.</p>
+                        <h1 className="text-3xl font-bold text-red-600">Receta no encontrada (ID Inválido)</h1>
+                        <p className="text-lg text-[var(--text-light)] mt-2">El ID de la URL es incorrecto o no existe en los datos cargados.</p>
                     </div>
                 );
             }
@@ -129,6 +161,7 @@
             
             return (
                 <div data-name="recipe-detail-component">
+                    {/* ... (Todo el contenido de la receta es el mismo) ... */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                         
                         {/* Columna de Imagen y Header */}
@@ -210,4 +243,61 @@
                                     <span className="text-[var(--text-dark)]">{nutritional.fat || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-1">
-                                    <span className="font
+                                    <span className="font-semibold text-sm">Carbohidratos</span>
+                                    <span className="text-[var(--text-dark)]">{nutritional.carbs || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // =================================================================
+        // [3] LÓGICA PRINCIPAL (DetailApp)
+        // =================================================================
+        function DetailApp() {
+            // **AÑADIDO:** Si hay un error de datos global, lo muestra antes de intentar renderizar la receta
+            if (globalDataError) {
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        <HeaderDetail />
+                        <main className="container mx-auto px-4 py-12">
+                            <DataErrorView message={globalDataError} />
+                        </main>
+                    </div>
+                );
+            }
+
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const recipeId = urlParams.get('id');
+
+                // Busca en el objeto fusionado
+                const recipe = recipeDetailsData[recipeId]; 
+                
+                return (
+                    <div className="min-h-screen bg-gray-50">
+                        <HeaderDetail />
+                        
+                        <main className="container mx-auto px-4 py-12">
+                            <RecipeDetail recipe={recipe} />
+                        </main>
+                    </div>
+                );
+            } catch (error) {
+                console.error('DetailApp component runtime error:', error);
+                return (
+                     <div className="text-center py-20">
+                        <h1 className="text-3xl font-bold text-red-600">Error fatal en la aplicación React</h1>
+                        <p className="text-lg text-[var(--text-light)] mt-2">Revise la consola para más detalles (F12).</p>
+                    </div>
+                );
+            }
+        }
+
+        const rootDetail = ReactDOM.createRoot(document.getElementById('root-detail'));
+        rootDetail.render(<DetailApp />);
+    </script>
+</body>
+</html>
