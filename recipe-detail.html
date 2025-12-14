@@ -1,19 +1,39 @@
+<script src="dietsData.js"></script> 
+    <script src="recipesData.js"></script> 
+    <script src="recipesDetails.js"></script> 
+    ```
+
+### 2. ➕ Cambios en el `<script type="text/babel">`: Lógica de Fusión
+
+Debemos adaptar la lógica de fusión al hecho de que ahora tienes **tres fuentes de datos principales**:
+
+* `dietsData` (para las categorías)
+* `recipesData` (para la metadata general de las recetas)
+* `recipesDetails` (para ingredientes y pasos)
+
+La lógica más eficiente es iterar sobre `recipesDetails` (que contiene los IDs de todas las recetas detalladas) y fusionarlo con la data de `recipesData` y `dietsData`.
+
+---
+
+### **CÓDIGO COMPLETO DE `recipe-detail.html` CORREGIDO**
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Detalle de Receta - RecetasApp</title>
-    <meta name="description" content="Descubre los ingredientes y pasos para preparar esta deliciosa receta">
     
-    <base href="/">
-
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/lucide-static@0.516.0/font/lucide.css" rel="stylesheet">
+    
+    <script src="dietsData.js"></script> 
+    <script src="recipesData.js"></script> 
+    <script src="recipesDetails.js"></script> 
 
     <style type="text/tailwindcss">
     @layer theme {
@@ -25,26 +45,17 @@
             --text-light: #718096;
         }
     }
-
     @layer base {
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            color: var(--text-dark);
-        }
+        body { font-family: 'Inter', sans-serif; color: var(--text-dark); }
     }
-
     @layer components {
-        .btn-primary {
-            @apply px-6 py-3 bg-[var(--primary-color)] text-white rounded-lg font-medium hover:opacity-90 transition-all;
-        }
-        
-        .category-card {
-            @apply bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden;
-        }
-        
-        .recipe-card {
-            @apply bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden;
-        }
+        /* Definiciones de íconos necesarias para la vista de detalle */
+        .icon-arrow-left::before { content: "\e900"; font-family: 'lucide-icons'; }
+        .icon-chef-hat::before { content: "\e901"; font-family: 'lucide-icons'; }
+        .icon-clock::before { content: "\e902"; font-family: 'lucide-icons'; }
+        .icon-flame::before { content: "\e903"; font-family: 'lucide-icons'; }
+        .icon-zap::before { content: "\e908"; font-family: 'lucide-icons'; }
+        .icon-star::before { content: "\e905"; font-family: 'lucide-icons'; }
     }
     </style>
 </head>
@@ -54,67 +65,32 @@
     <script type="text/babel">
         
         // =================================================================
-        // [1] DATOS DETALLADOS (recipeDetailsData)
-        // **DEBES COMPLETAR ESTE OBJETO CON LAS 30 RECETAS**
-        // SOLO AGREGUÉ LAS RECETAS 1 Y 2 COMO EJEMPLO COMPLETO
+        // [1] LÓGICA DE FUSIÓN DE DATOS (Crea las 30 recetas detalladas)
+        // Ahora usamos recipesDetails, recipesData y dietsData cargados desde los archivos .js
         // =================================================================
-        const recipeDetailsData = {
-            1: {
-                id: 1,
-                name: 'Ensalada de Pollo y Verduras',
-                dietType: 'hypocaloric',
-                dietTypeName: 'Hipocalórica',
-                description: 'Ensalada fresca con pechuga de pollo a la plancha, ideal para el almuerzo.',
-                time: '20 min',
-                difficulty: 'Fácil',
-                rating: 4.7,
-                calories: 280,
-                image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=800&h=600&fit=crop',
-                ingredients: [
-                    { name: 'Pechuga de pollo', quantity: '150 g' },
-                    { name: 'Lechuga romana', quantity: '1 taza' },
-                    { name: 'Tomates cherry', quantity: '1/2 taza' },
-                    { name: 'Aceite de oliva', quantity: '1 cucharada' }
-                ],
-                steps: [
-                    'Cocinar la pechuga de pollo a la plancha y cortarla en tiras.',
-                    'Lavar y cortar todos los vegetales.',
-                    'Mezclar todos los ingredientes en un bol.',
-                    'Aliñar con aceite de oliva y sal al gusto.'
-                ],
-                nutritionalInfo: { protein: '30g', fat: '12g', carbs: '15g' }
-            },
-            2: {
-                 id: 2, 
-                 name: 'Sopa de Verduras', 
-                 dietType: 'hypocaloric', 
-                 dietTypeName: 'Hipocalórica', 
-                 description: 'Sopa casera baja en calorías, perfecta para la cena o un día frío.', 
-                 time: '30 min', 
-                 difficulty: 'Fácil', 
-                 rating: 4.5, 
-                 calories: 150, 
-                 image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&h=300&fit=crop',
-                 ingredients: [
-                    { name: 'Apio', quantity: '2 tallos' },
-                    { name: 'Zanahorias', quantity: '2 unidades' },
-                    { name: 'Caldo de verduras', quantity: '1 litro' },
-                    { name: 'Cebolla', quantity: '1/2 unidad' }
-                 ],
-                 steps: [
-                    'Picar todos los vegetales en cubos pequeños.',
-                    'Sofreír la cebolla y las zanahorias en una olla.',
-                    'Añadir el caldo y el resto de vegetales. Cocinar por 20 minutos.',
-                    'Servir caliente.'
-                 ],
-                 nutritionalInfo: { protein: '5g', fat: '2g', carbs: '25g' }
-            },
-            // ... AGREGAR AQUÍ LAS RECETAS 3 a 30 con sus detalles ...
-        };
+        const recipeDetailsData = {};
 
+        // 1. Itera sobre las claves de los detalles (ID's)
+        Object.keys(recipesDetails).forEach(recipeId => {
+            const detail = recipesDetails[recipeId];
+            const baseRecipe = recipesData[recipeId]; // Asume que recipesData es un objeto mapeado por ID
+
+            if (baseRecipe && detail) {
+                // 2. Encuentra el nombre del tipo de dieta usando dietsData
+                const dietKey = baseRecipe.dietType;
+                const dietTypeName = dietsData[dietKey] ? dietsData[dietKey].name : 'Dieta Desconocida';
+
+                // 3. Fusiona toda la información en un solo objeto para el detalle
+                recipeDetailsData[recipeId] = {
+                    ...baseRecipe,
+                    dietTypeName: dietTypeName,
+                    ...detail,
+                };
+            }
+        });
 
         // =================================================================
-        // [2] COMPONENTES DE DETALLE
+        // [2] COMPONENTES DE DETALLE (Sin cambios respecto a la última vez)
         // =================================================================
         
         function HeaderDetail() {
@@ -123,12 +99,12 @@
                     <div className="container mx-auto px-4 py-4">
                         <div className="flex items-center justify-between">
                             <a href="index.html" className="flex items-center gap-2 text-[var(--primary-color)] hover:text-[var(--text-dark)] transition-colors">
-                                <div className="icon-arrow-left text-2xl"></div>
+                                <i className="icon-arrow-left text-2xl"></i>
                                 <span className="font-semibold text-lg hidden sm:block">Volver al menú</span>
                             </a>
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-lg bg-[var(--secondary-color)] flex items-center justify-center">
-                                    <div className="icon-chef-hat text-xl text-[var(--primary-color)]"></div>
+                                    <i className="icon-chef-hat text-xl text-[var(--primary-color)]"></i>
                                 </div>
                                 <span className="text-2xl font-bold text-[var(--primary-color)]">RecetasApp</span>
                             </div>
@@ -144,11 +120,12 @@
                 return (
                     <div className="text-center py-20">
                         <h1 className="text-3xl font-bold text-red-600">Receta no encontrada</h1>
-                        <p className="text-lg text-[var(--text-light)] mt-2">Verifique la URL o si la receta tiene datos de detalle cargados.</p>
+                        <p className="text-lg text-[var(--text-light)] mt-2">Verifique si el ID es correcto o si los datos están cargados.</p>
                     </div>
                 );
             }
-
+            const nutritional = recipe.nutritionalInfo || {}; 
+            
             return (
                 <div data-name="recipe-detail-component">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -156,9 +133,9 @@
                         {/* Columna de Imagen y Header */}
                         <div className="lg:col-span-2">
                             <div className="rounded-xl overflow-hidden shadow-lg mb-6">
-                                <img 
-                                    src={recipe.image} 
-                                    alt={recipe.name} 
+                                <img
+                                    src={recipe.image}
+                                    alt={recipe.name}
                                     className="w-full h-96 object-cover"
                                 />
                             </div>
@@ -172,19 +149,19 @@
                             {/* Ficha Rápida */}
                             <div className="flex flex-wrap gap-6 mt-6 border-t border-b border-gray-100 py-4">
                                 <div className="flex items-center gap-2">
-                                    <div className="icon-clock text-xl text-[var(--primary-color)]"></div>
+                                    <i className="icon-clock text-xl text-[var(--primary-color)]"></i>
                                     <span className="text-sm font-medium">{recipe.time}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="icon-flame text-xl text-[var(--primary-color)]"></div>
+                                    <i className="icon-flame text-xl text-[var(--primary-color)]"></i>
                                     <span className="text-sm font-medium">{recipe.calories} kcal</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className="icon-bolt text-xl text-[var(--primary-color)]"></div>
+                                    <i className="icon-zap text-xl text-[var(--primary-color)]"></i>
                                     <span className="text-sm font-medium">{recipe.difficulty}</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-yellow-500">
-                                    <div className="icon-star text-xl"></div>
+                                    <i className="icon-star text-xl"></i>
                                     <span className="text-sm font-medium">{recipe.rating}</span>
                                 </div>
                             </div>
@@ -195,9 +172,9 @@
                             <h2 className="text-2xl font-bold text-[var(--primary-color)] mb-4 border-b pb-2">Ingredientes</h2>
                             <ul className="space-y-3">
                                 {recipe.ingredients && recipe.ingredients.map((item, index) => (
+                                    // Los ingredientes se muestran como strings planos
                                     <li key={index} className="flex justify-between border-b border-gray-50 pb-2 last:border-b-0">
-                                        <span className="text-[var(--text-dark)]">{item.name}</span>
-                                        <span className="text-[var(--primary-color)] font-medium">{item.quantity}</span>
+                                        <span className="text-[var(--text-dark)]">{item}</span>
                                     </li>
                                 ))}
                                 {!recipe.ingredients && <p className="text-[var(--text-light)] text-sm">Lista de ingredientes no disponible.</p>}
@@ -224,18 +201,17 @@
                         <div className="lg:col-span-1 bg-white p-6 rounded-xl shadow-md h-fit">
                             <h2 className="text-2xl font-bold text-[var(--primary-color)] mb-4 border-b pb-2">Nutrición (Aprox.)</h2>
                             <div className="space-y-3">
-                                {/* Usamos acceso condicional por si el objeto nutricional no existe */}
                                 <div className="flex justify-between items-center py-1">
                                     <span className="font-semibold text-sm">Proteínas</span>
-                                    <span className="text-[var(--text-dark)]">{recipe.nutritionalInfo?.protein || 'N/A'}</span>
+                                    <span className="text-[var(--text-dark)]">{nutritional.protein || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-1">
                                     <span className="font-semibold text-sm">Grasas</span>
-                                    <span className="text-[var(--text-dark)]">{recipe.nutritionalInfo?.fat || 'N/A'}</span>
+                                    <span className="text-[var(--text-dark)]">{nutritional.fat || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-1">
                                     <span className="font-semibold text-sm">Carbohidratos</span>
-                                    <span className="text-[var(--text-dark)]">{recipe.nutritionalInfo?.carbs || 'N/A'}</span>
+                                    <span className="text-[var(--text-dark)]">{nutritional.carbs || 'N/A'}</span>
                                 </div>
                             </div>
                         </div>
@@ -249,12 +225,10 @@
         // =================================================================
         function DetailApp() {
             try {
-                // [1] Obtener el ID de la URL
                 const urlParams = new URLSearchParams(window.location.search);
-                // El ID en la URL es '1', '2', etc.
                 const recipeId = urlParams.get('id');
 
-                // [2] Buscar la receta en los datos (la clave es un string, por eso no se usa parseInt)
+                // Busca en el objeto fusionado (que ahora tiene las 30 recetas)
                 const recipe = recipeDetailsData[recipeId]; 
                 
                 return (
@@ -264,8 +238,6 @@
                         <main className="container mx-auto px-4 py-12">
                             <RecipeDetail recipe={recipe} />
                         </main>
-                        
-                        {/* Se omite el Footer por simplicidad, puedes agregarlo si tienes el componente Footer */}
                     </div>
                 );
             } catch (error) {
