@@ -1,7 +1,6 @@
 // =================================================================
 // [1] DATOS CONSOLIDADOS
 // =================================================================
-
 const dietsData = {
     diets: [
         {
@@ -77,9 +76,13 @@ const dietsData = {
         { id: 29, name: 'Chuletas de Cerdo', dietType: 'ketogenic', dietTypeName: 'Cetogénica', description: 'Chuletas jugosas con espárragos', time: '30 min', difficulty: 'Media', rating: 4.8, calories: 540, image: 'https://images.unsplash.com/photo-1432139555190-58524dae6a55?w=400&h=300&fit=crop' },
         { id: 30, name: 'Ensalada César Keto', dietType: 'ketogenic', dietTypeName: 'Cetogénica', description: 'Ensalada césar sin crutones con pollo', time: '15 min', difficulty: 'Fácil', rating: 4.7, calories: 420, image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=400&h=300&fit=crop' }
     ]
-};
+}; // <--- ¡EL PUNTO Y COMA ES OBLIGATORIO AQUÍ!
 
-const recipesDetails = { /* Generalmente vacío o con datos */ }; // <-- CORRECCIÓN: Punto y coma añadido aquí.
+
+// =================================================================
+// [2] CÓDIGO DE DETALLES DE RECETAS (recipesDetails) - ¡CORREGIDO!
+// =================================================================
+const recipesDetails = { /* Generalmente vacío o con datos */ }; // <--- ¡EL PUNTO Y COMA ES OBLIGATORIO AQUÍ!
 
 // =================================================================
 // [2] COMPONENTES DE REACT (JSX)
