@@ -49,13 +49,13 @@
 
         let globalDataError = null;
 
-        // **AÑADIDO:** Función para verificar la disponibilidad de los datos
         function checkDataAvailability() {
+            // Verifica si los objetos globales fueron definidos por los archivos JS
             if (!window.dietsData || !window.dietsData.diets || !window.dietsData.recipes) {
-                return "dietsData.js no está disponible o su estructura (dietsData.diets/recipes) es incorrecta. Revise la sintaxis (comas, llaves, punto y coma).";
+                return "dietsData.js parece tener errores de sintaxis (comas, llaves, punto y coma) o su estructura (dietsData.diets/recipes) es incorrecta.";
             }
             if (!window.recipesDetails) {
-                return "recipesDetails.js no está disponible. Revise la sintaxis, especialmente el cierre final: '};'";
+                return "recipesDetails.js no está disponible. Es el candidato más probable a tener un error de sintaxis que está bloqueando la aplicación. Revise el cierre final: '};'";
             }
             return null; // Todo bien
         }
@@ -100,7 +100,6 @@
                 });
                 
             } catch (e) {
-                // Capturar errores durante la normalización (ej: un dato es 'undefined')
                 globalDataError = `Error interno al procesar los datos (revisar la consola F12): ${e.message}`;
                 console.error("Error en el bloque de normalización de datos:", e);
             }
@@ -133,14 +132,13 @@
             );
         }
         
-        // **AÑADIDO:** Componente para mostrar un error de datos claro
         function DataErrorView({ message }) {
             return (
                 <div className="text-center py-20 bg-red-50 border-2 border-red-300 rounded-xl p-8 max-w-2xl mx-auto shadow-lg">
                     <h1 className="text-3xl font-bold text-red-700 mb-4">🚨 Error de Carga de Datos Críticos 🚨</h1>
                     <p className="text-lg text-red-600 mb-4 font-medium">{message}</p>
                     <p className="text-sm text-gray-700">
-                        **Acción requerida:** Revise los archivos `.js` (`dietsData.js`, `recipesDetails.js`, etc.) y asegúrese de que no tengan **errores de sintaxis** (comas extra, llaves o corchetes sin cerrar, puntos y comas faltantes). El error de un archivo detiene la aplicación.
+                        **Acción requerida:** Revise los archivos `.js` externos. Un error de sintaxis (comas extra, llaves o corchetes sin cerrar, puntos y comas faltantes) detiene toda la ejecución de JavaScript.
                     </p>
                     <p className="text-xs text-gray-500 mt-3">Para detalles técnicos, abra la Consola del Navegador (F12).</p>
                 </div>
@@ -161,7 +159,7 @@
             
             return (
                 <div data-name="recipe-detail-component">
-                    {/* ... (Todo el contenido de la receta es el mismo) ... */}
+                    {/* ... Contenido de la receta ... */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                         
                         {/* Columna de Imagen y Header */}
@@ -257,7 +255,6 @@
         // [3] LÓGICA PRINCIPAL (DetailApp)
         // =================================================================
         function DetailApp() {
-            // **AÑADIDO:** Si hay un error de datos global, lo muestra antes de intentar renderizar la receta
             if (globalDataError) {
                 return (
                     <div className="min-h-screen bg-gray-50">
@@ -272,8 +269,6 @@
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 const recipeId = urlParams.get('id');
-
-                // Busca en el objeto fusionado
                 const recipe = recipeDetailsData[recipeId]; 
                 
                 return (
