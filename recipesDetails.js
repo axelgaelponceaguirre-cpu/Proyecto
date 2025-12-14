@@ -529,4 +529,4 @@ const recipesDetails = {
       'Servir inmediatamente'
     ]
   }
-}
+};
